@@ -19,9 +19,8 @@ ___
 
 © 2022 Margaret KIBI
 
-This Source Code Form is subject to the terms of the Mozilla Public
-License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at https://mozilla.org/MPL/2.0/.
+This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 -->
 <xslt:transform
 	xmlns="http://www.w3.org/1999/xhtml"
@@ -44,7 +43,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 		Process non‐template elements.
 		By default, just copy the element, but remove any `@data-shrine-*` attribuets or `@slot` attributes with a value that begins with `shrine-`.
 	-->
-	<xslt:template match="*|text()">
+	<xslt:template match="*|text()" mode="content">
 		<xslt:copy>
 			<xslt:for-each select="@*[not(starts-with(name(), 'data-shrine-')) and not(name()='slot' and starts-with(.,'shrine-'))]">
 				<xslt:copy/>
@@ -57,7 +56,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 						</xslt:comment>
 					</xslt:when>
 					<xslt:otherwise>
-						<xslt:apply-templates select="."/>
+						<xslt:apply-templates select="." mode="content"/>
 					</xslt:otherwise>
 				</xslt:choose>
 			</xslt:for-each>
@@ -107,7 +106,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 			</xslt:for-each>
 			<xslt:for-each select="exslt:node-set($source)//*[@slot='shrine-head']">
 				<xslt:text>&#x0A;</xslt:text>
-				<xslt:apply-templates select="."/>
+				<xslt:apply-templates select="." mode="content"/>
 			</xslt:for-each>
 			<xslt:if test="not(exslt:node-set($source)//html:title[@slot='shrine-head'])">
 				<xslt:text>&#x0A;</xslt:text>
@@ -126,7 +125,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 	-->
 	<xslt:template match="html:shrine-header" mode="template">
 		<xslt:for-each select="exslt:node-set($source)/*/@data-shrine-header">
-			<xslt:apply-templates select="document(concat('./', ., '-header.xml'), $template)/*"/>
+			<xslt:apply-templates select="document(concat('./', ., '-header.xml'), $template)/*" mode="content"/>
 		</xslt:for-each>
 	</xslt:template>
 
@@ -137,7 +136,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 	-->
 	<xslt:template match="html:shrine-footer" mode="template">
 		<xslt:for-each select="exslt:node-set($source)/*/@data-shrine-footer">
-			<xslt:apply-templates select="document(concat('./', ., '-footer.xml'), $template)/*"/>
+			<xslt:apply-templates select="document(concat('./', ., '-footer.xml'), $template)/*" mode="content"/>
 		</xslt:for-each>
 	</xslt:template>
 
@@ -145,14 +144,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 		Process the content.
 	-->
 	<xslt:template match="html:shrine-content" mode="template">
-		<xslt:for-each select="$source">
-			<xslt:copy>
-				<xslt:for-each select="@*">
-					<xslt:copy/>
-				</xslt:for-each>
-				<xslt:apply-templates/>
-			</xslt:copy>
-		</xslt:for-each>
+		<xslt:apply-templates select="exslt:node-set($source)/*" mode="content"/>
 	</xslt:template>
 
 	<!--
