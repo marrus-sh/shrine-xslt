@@ -45,12 +45,12 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	-->
 	<xslt:template match="*|text()" mode="content">
 		<xslt:copy>
-			<xslt:for-each select="@*[not(starts-with(name(), 'data-shrine-')) and not(name()='slot' and starts-with(.,'shrine-'))]">
+			<xslt:for-each select="@*[not(starts-with(name(), 'data-shrine-')) and not(name()='slot' and starts-with(., 'shrine-'))]">
 				<xslt:copy/>
 			</xslt:for-each>
 			<xslt:for-each select="*|text()">
 				<xslt:choose>
-					<xslt:when test="@slot[starts-with(.,'shrine-')]">
+					<xslt:when test="@slot[starts-with(., 'shrine-')]">
 						<xslt:comment>
 							<text> placeholder for slotted element </text>
 						</xslt:comment>
@@ -86,7 +86,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 			<xslt:for-each select="@*">
 				<xslt:copy/>
 			</xslt:for-each>
-			<xslt:for-each select="exslt:node-set($source)/*/@*[name()='lang' or name()='xml:lang' or starts-with(name(),'data-') and not(starts-with(name(),'data-shrine-'))]">
+			<xslt:for-each select="exslt:node-set($source)/*/@*[name()='lang' or name()='xml:lang' or starts-with(name(), 'data-') and not(starts-with(name(), 'data-shrine-'))]">
 				<xslt:if test="not(exslt:node-set($template)/*/@*[name()=name(current())])">
 					<xslt:copy/>
 				</xslt:if>
