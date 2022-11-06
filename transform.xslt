@@ -42,6 +42,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	<!--
 		Process non‐template elements.
 		By default, just copy the element, but remove any `@data-shrine-*` attribuets or `@slot` attributes with a value that begins with `shrine-`.
+		Some elements may have special treatment.
 	-->
 	<xslt:template match="*|text()" mode="content">
 		<xslt:copy>
@@ -78,7 +79,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	</xslt:template>
 
 	<!--
-		Process the template `<html>`.
+		Process the template `<html>` elements.
 		This copies over `@lang` and non‐shrine `@data-*` attributes from the root node.
 	-->
 	<xslt:template match="html:html" mode="template">
@@ -96,17 +97,13 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	</xslt:template>
 
 	<!--
-		Process the template `<head>`.
+		Process the template `<head>` elements.
 		This inserts appropriate metadata based on the document.
 	-->
 	<xslt:template match="html:head" mode="template">
 		<xslt:copy>
 			<xslt:for-each select="@*">
 				<xslt:copy/>
-			</xslt:for-each>
-			<xslt:for-each select="exslt:node-set($source)//*[@slot='shrine-head']">
-				<xslt:text>&#x0A;</xslt:text>
-				<xslt:apply-templates select="." mode="content"/>
 			</xslt:for-each>
 			<xslt:if test="not(exslt:node-set($source)//html:title[@slot='shrine-head'])">
 				<xslt:text>&#x0A;</xslt:text>
@@ -115,6 +112,10 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 				</title>
 			</xslt:if>
 			<xslt:apply-templates mode="template"/>
+			<xslt:for-each select="exslt:node-set($source)//*[@slot='shrine-head']">
+				<xslt:text>&#x0A;</xslt:text>
+				<xslt:apply-templates select="." mode="content"/>
+			</xslt:for-each>
 		</xslt:copy>
 	</xslt:template>
 
