@@ -4,7 +4,8 @@ SHELL = /bin/sh
 #
 # • For files with a location of `sources/index.xml` or `sources/index-*.xml`, the transformed file will be written to `public/%.xhtml` (where `%` is the filename).
 #
-# • For all other files with a location of `sources/*.xml` or `sources/*/*.xml`, the transformed file will be written to `public/%/index.xhtml` (where `%` is the filename and subdirectory if applicable). Only one level of subdirectory is supported.
+# • For all other files with a location of `sources/*.xml` or `sources/*/*.xml`, the transformed file will be written to `public/%/index.xhtml` (where `%` is the filename and subdirectory if applicable).
+# Only one level of subdirectory is supported.
 #
 # By default, running `make` will do this for all applicable source files.
 #
@@ -12,9 +13,8 @@ SHELL = /bin/sh
 #
 # © 2022 Margaret KIBI
 #
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+# If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 XHTMLEXT = xhtml
 XSLT = xsltproc
