@@ -7,7 +7,6 @@ substantially changing the authoring flow.
 ## Features
 
 - Really simple shrine generation
-
 - One command: `make`
 
 ## Prerequisites
@@ -62,6 +61,11 @@ directory (which you can then serve statically from your server).
 - All other files at `sources/*.xml` and `sources/*/*.xml` will produce
   output at `public/%/index.html` (where `%` is the filename and
   optional subdirectory). Only one level of subdirectory is supported.
+
+- Any non‐X·M·L files in `sources/`, `sources/*/`, or `sources/*/*/`
+  directories will be copied over to the corresponding path in
+  `public/` as‐is, unless their filename begins with a dot (in which
+  case they are ignored).
 
 - The transformation doesn’t do any rewriting of links. Make sure you
   write them to point to the *final* location of the files, not their

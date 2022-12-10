@@ -7,6 +7,8 @@ SHELL = /bin/sh
 # • For all other files with a location of `sources/*.xml` or `sources/*/*.xml`, the transformed file will be written to `public/%/index.html` (where `%` is the filename and subdirectory if applicable).
 # Only one level of subdirectory is supported.
 #
+# Other non‐X·M·L, non‐dotfiles in `sources/`, `sources/*/`, or `sources/*/*/` are copied to the corresponding location in `public/` without modification.
+#
 # By default, running `make` will do this for all applicable source files.
 #
 # ___
@@ -29,11 +31,14 @@ override indices := $(patsubst sources/%.xml,public/%.html,$(indexsources))
 override pagesources := $(filter-out $(indexsources),$(wildcard sources/*.xml sources/*/*.xml))
 override pages := $(patsubst sources/%.xml,public/%/index.html,$(pagesources))
 
+override datasources := $(filter-out $(indexsources) $(pagesources) $(patsubst %/,%,$(wildcard sources/.* sources/*/.* sources/*/*/.* sources/*/ sources/*/*/ sources/*/*/*/)),$(wildcard sources/* sources/*/* sources/*/*/*))
+override datums := $(patsubst sources/%,public/%,$(datasources))
+
 override content := $(indices) $(pages)
 
 override makexslt = $(XSLT) --nonet --novalid $(XSLTOPTS) -o $(2) transform.xslt $(1)
 
-all: $(content) ;
+all: $(content) $(datums);
 
 $(indices): public/%.html: sources/%.xml $(prerequisites)
 	@echo "Generating $@…"
@@ -42,5 +47,10 @@ $(indices): public/%.html: sources/%.xml $(prerequisites)
 $(pages): public/%/index.html: sources/%.xml $(prerequisites)
 	@echo "Generating $@…"
 	@$(call makexslt,$<,$@)
+
+$(datums): public/%: sources/%
+	@echo "Copying over $@…"
+	@mkdir -p $(dir $<)
+	@cp $< $@
 
 .PHONY: all ;
