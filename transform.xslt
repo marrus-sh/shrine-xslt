@@ -24,7 +24,6 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 -->
 <xslt:transform
 	xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:exslt="http://exslt.org/common"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:xslt="http://www.w3.org/1999/XSL/Transform"
 	version="1.0"
@@ -36,7 +35,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		Instead of actually processing the root node, process the template in `template` mode.
 	-->
 	<xslt:template match="/">
-		<xslt:apply-templates select="exslt:node-set($template)" mode="template"/>
+		<xslt:apply-templates select="$template" mode="template"/>
 	</xslt:template>
 
 	<!--
@@ -87,8 +86,8 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 			<xslt:for-each select="@*">
 				<xslt:copy/>
 			</xslt:for-each>
-			<xslt:for-each select="exslt:node-set($source)/*/@*[name()='lang' or name()='xml:lang' or starts-with(name(), 'data-') and not(starts-with(name(), 'data-shrine-'))]">
-				<xslt:if test="not(exslt:node-set($template)/*/@*[name()=name(current())])">
+			<xslt:for-each select="$source/*/@*[name()='lang' or starts-with(name(), 'data-') and not(starts-with(name(), 'data-shrine-'))]">
+				<xslt:if test="not($template/*/@*[name()=name(current())])">
 					<xslt:copy/>
 				</xslt:if>
 			</xslt:for-each>
@@ -105,15 +104,13 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 			<xslt:for-each select="@*">
 				<xslt:copy/>
 			</xslt:for-each>
-			<xslt:if test="not(exslt:node-set($source)//html:title[@slot='shrine-head'])">
-				<xslt:text>&#x0A;</xslt:text>
+			<xslt:if test="not($source//html:title[@slot='shrine-head'])">
 				<title>
-					<xslt:apply-templates select="exslt:node-set($source)//html:h1" mode="text"/>
+					<xslt:apply-templates select="$source//html:h1" mode="text"/>
 				</title>
 			</xslt:if>
 			<xslt:apply-templates mode="template"/>
-			<xslt:for-each select="exslt:node-set($source)//*[@slot='shrine-head']">
-				<xslt:text>&#x0A;</xslt:text>
+			<xslt:for-each select="$source//*[@slot='shrine-head']">
 				<xslt:apply-templates select="." mode="content"/>
 			</xslt:for-each>
 		</xslt:copy>
@@ -125,7 +122,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		If no `@data-header` attribute is provided, no header is rendered.
 	-->
 	<xslt:template match="html:shrine-header" mode="template">
-		<xslt:for-each select="exslt:node-set($source)/*/@data-shrine-header">
+		<xslt:for-each select="$source/*/@data-shrine-header">
 			<xslt:apply-templates select="document(concat('./', ., '-header.xml'), $template)/*" mode="content"/>
 		</xslt:for-each>
 	</xslt:template>
@@ -136,7 +133,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		If no `@data-footer` attribute is provided, no footer is rendered.
 	-->
 	<xslt:template match="html:shrine-footer" mode="template">
-		<xslt:for-each select="exslt:node-set($source)/*/@data-shrine-footer">
+		<xslt:for-each select="$source/*/@data-shrine-footer">
 			<xslt:apply-templates select="document(concat('./', ., '-footer.xml'), $template)/*" mode="content"/>
 		</xslt:for-each>
 	</xslt:template>
@@ -145,7 +142,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		Process the content.
 	-->
 	<xslt:template match="html:shrine-content" mode="template">
-		<xslt:apply-templates select="exslt:node-set($source)/*" mode="content"/>
+		<xslt:apply-templates select="$source/*" mode="content"/>
 	</xslt:template>
 
 	<!--
@@ -161,4 +158,9 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 			</xslt:when>
 		</xslt:choose>
 	</xslt:template>
+
+	<!--
+		Set the output mode to HTML.
+	-->
+	<xslt:output method="html" charset="UTF-8" doctype-system="about:legacy-compat"/>
 </xslt:transform>

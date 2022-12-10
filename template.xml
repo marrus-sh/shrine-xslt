@@ -1,10 +1,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta name="generator" content="https://github.com/marrus-sh/shrine-xslt"/>
-</head>
+<head><meta name="generator" content="https://github.com/marrus-sh/shrine-xslt"/></head>
 <body>
 <shrine-header/>
+
+<main>
 <shrine-content/>
+</main>
+
 <shrine-footer/>
 </body>
 </html>

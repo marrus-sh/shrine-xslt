@@ -12,11 +12,10 @@ substantially changing the authoring flow.
 
 ## Prerequisites
 
-These things come preinstalled on many platforms :—
+These things come pre·installed on many platforms :—
 
-- G·N·U Make (run `make --version` to see if it is installed)
-
-- libxslt (run `xsltproc --version` to see if it is installed)
+- G·N·U `make` (run `make --version` to see if it is installed)
+- `xsltproc` (run `xsltproc --version` to see if it is installed)
 
 You will also need to know how to write X·M·L, and how to navigate to a
 directory via the command line and run `make`.
@@ -48,41 +47,20 @@ page. The `<shrine-header>`, `<shrine-content>`, and `<shrine-footer>`
 elements will be replaced by the page header, content, and footer,
 respectively.
 
-Finally, just run `make` from this directory, and X·H·T·M·L files
+Finally, just run `make` from this directory, and H·T·M·L files
 corresponding to your source files will be created in the `public/`
 directory (which you can then serve statically from your server).
 
 ## Notes
 
-- The created files have a `.xhtml` extension and *need* to be served
-  with a `application/xhtml+xml` (or `application/xml`) media type. Not
-  all servers know how to serve `.xhtml` files; if this is you, you may
-  have better luck with `make XHTMLEXT=xml` (which will produce `.xml`
-  files instead).
-
-  - Some free hosting options require that “index” pages have an
-    extension of `.html`; these will unfortunately not work. It is
-    possible to extend the makefile to generate `index.html` redirects
-    to `index.xhtml` with the following code :—
-
-    ```make
-    override redirects := $(patsubst public/%.$(XHTMLEXT),public/%.html,$(indices) $(pages))
-
-    all: $(redirects) # in addition to the previously declared prerequisites
-
-    $(redirects):
-    	# You may want a more involved redirect page than this, but it’s an example…
-    	echo '<!DOCTYPE html><meta http-equiv="refresh" content="0;url=./index.xhtml">' > $@
-    ```
-
-    This should be considered a last resort, but it can be used to get
-    your site working on e·g Neocities.
+- The created files have a `.html` extension and need to be served
+  with a `text/html` media type.
 
 - Files at `sources/index.xml` and `sources/index-*.xml` will produce
-  output at `public/%.xhtml` (where `%` is the filename).
+  output at `public/%.html` (where `%` is the filename).
 
 - All other files at `sources/*.xml` and `sources/*/*.xml` will produce
-  output at `public/%/index.xhtml` (where `%` is the filename and
+  output at `public/%/index.html` (where `%` is the filename and
   optional subdirectory). Only one level of subdirectory is supported.
 
 - The transformation doesn’t do any rewriting of links. Make sure you
