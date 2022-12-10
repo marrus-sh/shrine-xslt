@@ -62,10 +62,9 @@ directory (which you can then serve statically from your server).
   output at `public/%/index.html` (where `%` is the filename and
   optional subdirectory). Only one level of subdirectory is supported.
 
-- Any non‐X·M·L files in `sources/`, `sources/*/`, or `sources/*/*/`
-  directories will be copied over to the corresponding path in
-  `public/` as‐is, unless their filename begins with a dot (in which
-  case they are ignored).
+- For any files at `sources/*.xml` and `sources/*/*.xml`, files in the
+  folder with the same name (minus the `.xml`) will be copied over
+  verbatim.
 
 - The transformation doesn’t do any rewriting of links. Make sure you
   write them to point to the *final* location of the files, not their
