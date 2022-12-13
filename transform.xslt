@@ -23,7 +23,6 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 -->
 <xslt:transform
-	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:xslt="http://www.w3.org/1999/XSL/Transform"
 	version="1.0"
@@ -43,8 +42,8 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		By default, just copy the element, but remove any `@data-shrine-*` attribuets or `@slot` attributes with a value that begins with `shrine-`.
 		Some elements may have special treatment.
 	-->
-	<xslt:template match="*|text()" mode="content">
-		<xslt:copy>
+	<xslt:template match="*" mode="content">
+		<xslt:element name="{local-name()}">
 			<xslt:for-each select="@*[not(starts-with(name(), 'data-shrine-')) and not(name()='slot' and starts-with(., 'shrine-'))]">
 				<xslt:copy/>
 			</xslt:for-each>
@@ -60,7 +59,14 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 					</xslt:otherwise>
 				</xslt:choose>
 			</xslt:for-each>
-		</xslt:copy>
+		</xslt:element>
+	</xslt:template>
+
+	<!--
+		Process text content; just make a copy.
+	-->
+	<xslt:template match="text()" mode="content">
+		<xslt:copy/>
 	</xslt:template>
 
 	<!--
@@ -68,13 +74,20 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		By default, just copy the element.
 		This behaviour will be overridden for certain elements to insert the page content.
 	-->
-	<xslt:template match="*|text()" mode="template">
-		<xslt:copy>
+	<xslt:template match="*" mode="template">
+		<xslt:element name="{local-name()}">
 			<xslt:for-each select="@*">
 				<xslt:copy/>
 			</xslt:for-each>
 			<xslt:apply-templates mode="template"/>
-		</xslt:copy>
+		</xslt:element>
+	</xslt:template>
+
+	<!--
+		Process template text; just make a copy.
+	-->
+	<xslt:template match="text()" mode="content">
+		<xslt:copy/>
 	</xslt:template>
 
 	<!--
@@ -82,8 +95,8 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		This copies over `@lang` and non‐shrine `@data-*` attributes from the root node.
 	-->
 	<xslt:template match="html:html" mode="template">
-		<xslt:copy>
-			<xslt:for-each select="@*">
+		<html>
+			<xslt:for-each select="@*[not(starts-with(name(), 'xmlns'))]">
 				<xslt:copy/>
 			</xslt:for-each>
 			<xslt:for-each select="$source/*/@*[name()='lang' or starts-with(name(), 'data-') and not(starts-with(name(), 'data-shrine-'))]">
@@ -92,7 +105,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 				</xslt:if>
 			</xslt:for-each>
 			<xslt:apply-templates mode="template"/>
-		</xslt:copy>
+		</html>
 	</xslt:template>
 
 	<!--
@@ -100,7 +113,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		This inserts appropriate metadata based on the document.
 	-->
 	<xslt:template match="html:head" mode="template">
-		<xslt:copy>
+		<head>
 			<xslt:for-each select="@*">
 				<xslt:copy/>
 			</xslt:for-each>
@@ -113,7 +126,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 			<xslt:for-each select="$source//*[@slot='shrine-head']">
 				<xslt:apply-templates select="." mode="content"/>
 			</xslt:for-each>
-		</xslt:copy>
+		</head>
 	</xslt:template>
 
 	<!--
