@@ -175,5 +175,5 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	<!--
 		Set the output mode to HTML.
 	-->
-	<xslt:output method="html" charset="UTF-8" doctype-system="about:legacy-compat"/>
+	<xslt:output method="html" charset="UTF-8" doctype-system="about:legacy-compat" indent="no"/>
 </xslt:transform>
