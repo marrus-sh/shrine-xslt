@@ -23,10 +23,41 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 -->
 <xslt:transform
+	xmlns:atom="http://www.w3.org/2005/Atom"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:xslt="http://www.w3.org/1999/XSL/Transform"
 	version="1.0"
 >
+	<xslt:param name="BASEIRI" select="'http://example.com'"/>
+	<xslt:param name="DATETIME" select="'1972-12-31T00:00:00Z'"/>
+	<xslt:param name="OUTPUTPATH" select="'/unknown'"/>
+	<xslt:variable name="baseiri">
+		<xslt:choose>
+			<xslt:when test="contains($BASEIRI, '://')"> <!-- there is an authority -->
+				<xslt:variable name="noscheme" select="substring-after($BASEIRI, '://')"/>
+				<xslt:value-of select="substring-before($BASEIRI, '://')"/>
+				<xslt:text>://</xslt:text>
+				<xslt:choose>
+					<xslt:when test="contains($noscheme, '/')">
+						<xslt:value-of select="substring-before($noscheme, '/')"/>
+					</xslt:when>
+					<xslt:otherwise>
+						<xslt:value-of select="$noscheme"/>
+					</xslt:otherwise>
+				</xslt:choose>
+			</xslt:when>
+			<xslt:otherwise>
+				<xslt:value-of select="substring-before($BASEIRI, ':')"/>
+			</xslt:otherwise>
+		</xslt:choose>
+	</xslt:variable>
+	<xslt:variable name="datetime" select="string($DATETIME)"/>
+	<xslt:variable name="outputpath">
+		<xslt:if test="not(starts-with($OUTPUTPATH, '/'))">
+			<xslt:text>/</xslt:text>
+		</xslt:if>
+		<xslt:value-of select="$OUTPUTPATH"/>
+	</xslt:variable>
 	<xslt:variable name="source" select="current()"/>
 	<xslt:variable name="template" select="document('./template.xml')"/>
 
@@ -34,7 +65,14 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 		Instead of actually processing the root node, process the template in `template` mode.
 	-->
 	<xslt:template match="/">
-		<xslt:apply-templates select="$template" mode="template"/>
+		<xslt:choose>
+			<xslt:when test="atom:feed">
+				<xslt:apply-templates mode="feed"/>
+			</xslt:when>
+			<xslt:otherwise>
+				<xslt:apply-templates select="$template" mode="template"/>
+			</xslt:otherwise>
+		</xslt:choose>
 	</xslt:template>
 
 	<!--
@@ -122,6 +160,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 					<xslt:apply-templates select="$source//html:h1" mode="text"/>
 				</title>
 			</xslt:if>
+			<meta name="generator" content="https://github.com/marrus-sh/shrine-xslt"/>
 			<xslt:apply-templates mode="template"/>
 			<xslt:for-each select="$source//*[@slot='shrine-head']">
 				<xslt:apply-templates select="." mode="content"/>
@@ -159,6 +198,135 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	</xslt:template>
 
 	<!--
+		Process feed elements and text.
+		By default, just make a copy.
+		This behaviour will be overridden for certain elements to generate feed metadata.
+	-->
+	<xslt:template match="*|text()" mode="feed">
+		<xslt:copy>
+			<xslt:for-each select="@*">
+				<xslt:copy/>
+			</xslt:for-each>
+			<xslt:apply-templates mode="feed"/>
+		</xslt:copy>
+	</xslt:template>
+
+	<!--
+		Process the root feed element.
+		This adds required metadata when it has not been provided in the source X·M·L.
+	-->
+	<xslt:template match="atom:feed" mode="feed">
+		<xslt:text>&#x0A;</xslt:text> <!-- ensure a newline between the doctype and the feed element -->
+		<feed xmlns="http://www.w3.org/2005/Atom">
+			<xslt:for-each select="@*">
+				<xslt:copy/>
+			</xslt:for-each>
+			<xslt:apply-templates select="text()[following-sibling::*[not(self::atom:entry)]]|*[not(self::atom:entry)]" mode="feed"/>
+			<xslt:if test="not(atom:id)">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<id>
+					<xslt:choose>
+						<xslt:when test="contains($baseiri, '://')">
+							<xslt:text>oai:</xslt:text>
+							<xslt:value-of select="substring-after($baseiri, '://')"/>
+							<xslt:text>:</xslt:text>
+						</xslt:when>
+						<xslt:otherwise>
+							<xslt:value-of select="$baseiri"/>
+							<xslt:text>/</xslt:text>
+						</xslt:otherwise>
+					</xslt:choose>
+					<xslt:value-of select="$outputpath"/>
+				</id>
+			</xslt:if>
+			<xslt:if test="not(atom:title)">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<title xml:lang="en">Untitled</title>
+			</xslt:if>
+			<xslt:if test="not(atom:author)">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<author>
+					<name xml:lang="en">Anonymous</name>
+				</author>
+			</xslt:if>
+			<xslt:if test="not(atom:link[@rel='alternate'][@type='text/html'])">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<link rel="alternate" type="text/html" href="{$baseiri}/"/>
+			</xslt:if>
+			<xslt:if test="not(atom:link[@rel='self'])">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<link rel="self" type="application/atom+xml" href="{$baseiri}{$outputpath}"/>
+			</xslt:if>
+			<xslt:if test="not(atom:updated)">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<updated>
+					<xslt:value-of select="$datetime"/>
+				</updated>
+			</xslt:if>
+			<xslt:if test="not(atom:generator)">
+				<xslt:text>&#x0A;&#x09;</xslt:text>
+				<generator uri="https://github.com/marrus-sh/shrine-xslt">shrine-xslt</generator>
+			</xslt:if>
+			<xslt:apply-templates select="atom:entry" mode="feed"/>
+			<xslt:text>&#x0A;</xslt:text> <!-- newline before close tag -->
+		</feed>
+	</xslt:template>
+
+	<!--
+		Process feed entry elements.
+	-->
+	<xslt:template match="atom:entry[atom:link[@rel='alternate'][starts-with(@href, '/')][@type='text/html']]" mode="feed">
+		<xslt:variable name="entryhref" select="atom:link[@rel='alternate'][starts-with(@href, '/')][@type='text/html'][1]/@href"/>
+		<xslt:text>&#x0A;&#x09;</xslt:text>
+		<entry xmlns="http://www.w3.org/2005/Atom">
+			<xslt:for-each select="@*">
+				<xslt:copy/>
+			</xslt:for-each>
+			<xslt:apply-templates select="text()[following-sibling::*]|*" mode="feed"/>
+			<xslt:if test="not(atom:id)">
+				<xslt:text>&#x0A;&#x09;&#x09;</xslt:text>
+				<id>
+					<xslt:choose>
+						<xslt:when test="contains($baseiri, '://')">
+							<xslt:text>oai:</xslt:text>
+							<xslt:value-of select="substring-after($baseiri, '://')"/>
+							<xslt:text>:</xslt:text>
+						</xslt:when>
+						<xslt:otherwise>
+							<xslt:value-of select="$baseiri"/>
+							<xslt:text>/</xslt:text>
+						</xslt:otherwise>
+					</xslt:choose>
+					<xslt:value-of select="$entryhref"/>
+				</id>
+			</xslt:if>
+			<xslt:if test="not(atom:title)">
+				<xslt:text>&#x0A;&#x09;&#x09;</xslt:text>
+				<title xml:lang="en">Untitled</title>
+			</xslt:if>
+			<xslt:if test="not(atom:updated)">
+				<xslt:text>&#x0A;&#x09;&#x09;</xslt:text>
+				<updated>
+					<xslt:value-of select="$datetime"/>
+				</updated>
+			</xslt:if>
+			<xslt:text>&#x0A;&#x09;</xslt:text> <!-- newline before close tag -->
+		</entry>
+	</xslt:template>
+
+	<!--
+		Process feed link elements.
+		This simply rewrites absolute links to be relative.
+	-->
+	<xslt:template match="atom:link[starts-with(@href, '/')]" mode="feed">
+		<link xmlns="http://www.w3.org/2005/Atom" rel="{@rel}" href="{$baseiri}{@href}">
+			<xslt:for-each select="@*[local-name()!='rel' and local-name()!='href']">
+				<xslt:copy/>
+			</xslt:for-each>
+		</link>
+	</xslt:template>
+
+	<!--
 		Provide the complete text content of the provided element.
 	-->
 	<xslt:template match="*|text()" mode="text">
@@ -173,7 +341,9 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	</xslt:template>
 
 	<!--
-		Set the output mode to HTML.
+		Set up output.
+		Note that this relies on “default” output method detection specified in X·S·L·T in order to work.
+		The `about:legacy-compat` system doctype is for H·T·M·L compatibility but is harmless in X·M·L.
 	-->
-	<xslt:output method="html" charset="UTF-8" doctype-system="about:legacy-compat" indent="no"/>
+	<xslt:output charset="UTF-8" doctype-system="about:legacy-compat" indent="no"/>
 </xslt:transform>

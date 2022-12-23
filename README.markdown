@@ -50,6 +50,31 @@ Finally, just run `make` from this directory, and H·T·M·L files
 corresponding to your source files will be created in the `public/`
 directory (which you can then serve statically from your server).
 
+## Atom Feeds
+
+Any `.atom` files you provide will automatically be filled out with
+`<id>`s, `<updated>` values, and other necessary information before
+being copied to the destination location. If you wish to use this
+feature, you will need to provide a `BASEIRI` variable when you run
+`make` to allow the X·S·L·T to transform relative links into absolute
+ones.
+
+It is recommended that :—
+
+- You do *not* provide your own `<id>`s and rely on the generated ones
+  (which will be an `oai:` URI derived from the file path).
+
+- You *do* manually provide `<updated>` times for individual entries
+  (although not the feed as a whole); otherwise every entry will be
+  marked as updated every time the feed is generated.
+
+- All `<link rel="alternate">` elements in `<entry>` elements use a
+  relative `@href` with a leading slash. This should point to the
+  *final* location of the entry (within, but not including, `public/`).
+
+There’s an example `feed.atom` provided so you can see what this
+  feature might look like in practice.
+
 ## Notes
 
 - The created files have a `.html` extension and need to be served

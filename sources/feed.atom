@@ -1,0 +1,9 @@
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>My Amazing Shrine</title>
+	<author>Me</author>
+	<entry>
+		<link rel="alternate" href="/blog/1972-12-31/" type="text/html"/>
+		<title>My Blog Post</title>
+		<updated>1972-12-31T00:00:00Z</updated>
+	</entry>
+</feed>
