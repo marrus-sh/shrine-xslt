@@ -31,14 +31,14 @@ of these files should typically be an H·T·M·L `<article>` element
 (remember to declare the X·H·T·M·L namespace!), and you should give it
 a `@lang` attribute as well. An example is provided.
 
-The `@data-shrine-header` and `@data-shrine-footer` attributes on the
-root elements of your pages specify the names of the header and footer
-to use on the page. You can use headers and footers to supply page
-navigation, branding, and so forth. For each header and footer you
-specify, you will need to create a corresponding `$-header.xml` or
-`$-footer.xml` (where `$` is the header/footer name) which provides
-the contents. These files should be placed in *this* (repository root)
-directory, not in `sources/`.
+The (entirely optional) `@data-shrine-header` and `@data-shrine-footer`
+attributes on the root elements of your pages specify the names of the
+header and footer to use on the page. You can use headers and footers
+to supply page navigation, branding, and so forth. For each header and
+footer you specify, you will need to create a corresponding
+`$-header.xml` or `$-footer.xml` (where `$` is the header/footer name)
+which provides the contents. These files should be placed in *this*
+(repository root) directory, not in `sources/`.
 
 The `template.xml` file in this directory contains the main page
 template, and you should edit it to add styling and so forth to your
@@ -50,7 +50,42 @@ Finally, just run `make` from this directory, and H·T·M·L files
 corresponding to your source files will be created in the `public/`
 directory (which you can then serve statically from your server).
 
-## Atom Feeds
+## Advanced Features
+
+### Slots
+
+You can use the `@slot` attribute with a few special values to insert
+content in various places :—
+
+- `@slot="shrine-head"` will place the content into the `<head>` of
+  the resulting document. This is especially useful for `<title>`,
+  `<meta>`, and `<style>` elements.
+
+- For `shrine-header` and `shrine-footer`, there are `-before` and
+  `-after` slot names which will place content into the beginning or
+  ending of the shrine header or footer, respectively.
+
+- You can define your own slots with `<slot>` in templates, headers,
+  and footers; this will enable a corresponding `@slot` name beginning
+  with `shrine-template-slot-`, `shrine-header-slot-` or
+  `shrine-footer-slot`, respectively.
+
+### Microdata
+
+You can use the H·T·M·L `@itemprop` attribute to define metadata for
+your site pages. The following values are supported :—
+
+- `shrine-title`: The title of the page.
+
+- `shrine-id`: A persistent, globally‐unique identifier for the page.
+
+- `shrine-updated`: The datetime that the page was last updated.
+
+Multiple values for a single `@itemprop` are not currently supported.
+Where possible, X·M·L markup will be preserved when accessing metadata
+values.
+
+### Atom Feeds
 
 Any `.atom` files you provide will automatically be filled out with
 `<id>`s, `<updated>` values, and other necessary information before
@@ -59,23 +94,10 @@ feature, you will need to provide a `BASEIRI` variable when you run
 `make` to allow the X·S·L·T to transform relative links into absolute
 ones.
 
-It is recommended that :—
-
-- You do *not* provide your own `<id>`s and rely on the generated ones
-  (which will be an `oai:` URI derived from the file path).
-
-- You *do* manually provide `<updated>` times for individual entries
-  (although not the feed as a whole); otherwise every entry will be
-  marked as updated every time the feed is generated.
-
-- All `<link rel="alternate">` elements in `<entry>` elements use a
-  relative `@href` with a leading slash. This should point to the
-  *final* location of the entry (within, but not including, `public/`).
-
 There’s an example `feed.atom` provided so you can see what this
-  feature might look like in practice.
+feature might look like in practice.
 
-## Notes
+## Additional Notes
 
 - The created files have a `.html` extension and need to be served
   with a `text/html` media type.
@@ -99,22 +121,6 @@ There’s an example `feed.atom` provided so you can see what this
   add to the root (`<article>`) element will be copied onto the root
   (`<html>`) element of the template, as will `@lang` and `@xml:lang`.
   You can use this to help configure page‐specific styling.
-
-- You can use the `@slot` attribute with a few special values to insert
-  content in various places :—
-
-  - `@slot="shrine-head"` will place the content into the `<head>` of
-    the resulting document. This is especially useful for `<title>`,
-    `<meta>`, and `<style>` elements.
-
-  - For `shrine-header` and `shrine-footer`, there are `-before` and
-    `-after` slot names which will place content into the beginning or
-    ending of the shrine header or footer, respectively.
-
-  - You can define your own slots with `<slot>` in templates, headers,
-    and footers; this will enable a corresponding `@slot` name
-    beginning with `shrine-template-slot-`, `shrine-header-slot-` or
-    `shrine-footer-slot`, respectively.
 
 - If you delete files from `sources/`, the corresponding files in
   `public/` will **not** be deleted and will need to be manually
