@@ -1,6 +1,6 @@
 <!--
-This is an extremely simple XSLT transform which simply reads in a
-`template.xml` and :—
+This is a⸠n extremely simple⸡ progressively‐less‐simple X·S·L·T
+transform which simply reads in a `template.xml` and :—
 
 • Replaces the `<html:shrine-content>` element with the content of the document it is being applied to,
 
@@ -124,7 +124,7 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	<!--
 		Process template text; just make a copy.
 	-->
-	<xslt:template match="text()" mode="content">
+	<xslt:template match="text()" mode="template">
 		<xslt:copy/>
 	</xslt:template>
 
@@ -169,25 +169,43 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	</xslt:template>
 
 	<!--
-		Process the template header.
-		Read the `@data-header` attribute of the root element, append `"-header.xml"` to the end of it, and process the resulting document.
-		If no `@data-header` attribute is provided, no header is rendered.
+		Process the template header and footer.
+		Read the corresponding `@data-header` or `@data-footer` attribute of the root element, append `"-header.xml"` or `"-footer.xml"` to the end of it, and process the resulting document.
+		If no `@data-header` or `@data-footer` attribute is provided, nothing is rendered.
 	-->
-	<xslt:template match="html:shrine-header" mode="template">
-		<xslt:for-each select="$source/*/@data-shrine-header">
-			<xslt:apply-templates select="document(concat('./', ., '-header.xml'), $template)/*" mode="content"/>
-		</xslt:for-each>
-	</xslt:template>
-
-	<!--
-		Process the template footer.
-		Read the `@data-footer` attribute of the root element, append `"-footer.xml"` to the end of it, and process the resulting document.
-		If no `@data-footer` attribute is provided, no footer is rendered.
-	-->
-	<xslt:template match="html:shrine-footer" mode="template">
-		<xslt:for-each select="$source/*/@data-shrine-footer">
-			<xslt:apply-templates select="document(concat('./', ., '-footer.xml'), $template)/*" mode="content"/>
-		</xslt:for-each>
+	<xslt:template match="html:shrine-header|html:shrine-footer" mode="template">
+		<xslt:param name="context" select="'shrine-template'"/>
+		<xslt:variable name="kind" select="substring-after(local-name(), 'shrine-')"/>
+		<xslt:choose>
+			<xslt:when test="$context='shrine-template'">
+				<xslt:for-each select="$source/*/@*[name()=concat('data-shrine-', $kind)]">
+					<xslt:for-each select="document(concat('./', ., '-', $kind, '.xml'), $template)/*">
+						<xslt:element name="{local-name()}">
+							<xslt:for-each select="@*">
+								<xslt:copy/>
+							</xslt:for-each>
+							<xslt:for-each select="$source//*[@slot=concat('shrine-', $kind, '-before')]">
+								<xslt:apply-templates select="." mode="content"/>
+							</xslt:for-each>
+							<xslt:apply-templates mode="template">
+								<xslt:with-param name="context" select="concat('shrine-', $kind)"/>
+							</xslt:apply-templates>
+							<xslt:for-each select="$source//*[@slot=concat('shrine-', $kind, '-after')]">
+								<xslt:apply-templates select="." mode="content"/>
+							</xslt:for-each>
+						</xslt:element>
+					</xslt:for-each>
+				</xslt:for-each>
+			</xslt:when>
+			<xslt:otherwise>
+				<xslt:element name="{local-name()}">
+					<xslt:for-each select="@*">
+						<xslt:copy/>
+					</xslt:for-each>
+					<xslt:apply-templates mode="template"/>
+				</xslt:element>
+			</xslt:otherwise>
+		</xslt:choose>
 	</xslt:template>
 
 	<!--
@@ -195,6 +213,17 @@ If a copy of the MPL was not distributed with this file, You can obtain one at h
 	-->
 	<xslt:template match="html:shrine-content" mode="template">
 		<xslt:apply-templates select="$source/*" mode="content"/>
+	</xslt:template>
+
+	<!--
+		Process miscellaneous template slots.
+	-->
+	<xslt:template match="html:slot[not(ancestor::html:template)]" mode="template">
+		<xslt:param name="context" select="'shrine-template'"/>
+		<xslt:variable name="name" select="string(@name)"/>
+		<xslt:for-each select="$source//*[@slot=concat($context, '-slot-', $name)]">
+			<xslt:apply-templates select="." mode="content"/>
+		</xslt:for-each>
 	</xslt:template>
 
 	<!--

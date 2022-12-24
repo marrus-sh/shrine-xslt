@@ -100,10 +100,21 @@ There’s an example `feed.atom` provided so you can see what this
   (`<html>`) element of the template, as will `@lang` and `@xml:lang`.
   You can use this to help configure page‐specific styling.
 
-- You can insert content into the `<head>` of the template by setting
-  `@slot="shrine-head"` on the appropriate elements. For example, one
-  might customize the title of a page like
-  `<title slot="shrine-head">My Title | My Cool Shrine</title>`.
+- You can use the `@slot` attribute with a few special values to insert
+  content in various places :—
+
+  - `@slot="shrine-head"` will place the content into the `<head>` of
+    the resulting document. This is especially useful for `<title>`,
+    `<meta>`, and `<style>` elements.
+
+  - For `shrine-header` and `shrine-footer`, there are `-before` and
+    `-after` slot names which will place content into the beginning or
+    ending of the shrine header or footer, respectively.
+
+  - You can define your own slots with `<slot>` in templates, headers,
+    and footers; this will enable a corresponding `@slot` name
+    beginning with `shrine-template-slot-`, `shrine-header-slot-` or
+    `shrine-footer-slot`, respectively.
 
 - If you delete files from `sources/`, the corresponding files in
   `public/` will **not** be deleted and will need to be manually
